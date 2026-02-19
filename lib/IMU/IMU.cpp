@@ -21,7 +21,7 @@ bool ICM20649IMU::init(int cs, int clk, int miso, int mosi)
     {
         return false;
     }
-    // controller.setAccelRange(ICM20649_ACCEL_RANGE_4_G);
+    controller.setAccelRange(ICM20649_ACCEL_RANGE_30_G);
     Serial.print("Accelerometer range set to: ");
     switch (controller.getAccelRange())
     {
@@ -39,7 +39,7 @@ bool ICM20649IMU::init(int cs, int clk, int miso, int mosi)
         break;
     }
 
-    // controller.setGyroRange(ICM20649_GYRO_RANGE_500_DPS);
+    controller.setGyroRange(ICM20649_GYRO_RANGE_1000_DPS);
     Serial.print("Gyro range set to: ");
     switch (controller.getGyroRange())
     {
@@ -57,7 +57,7 @@ bool ICM20649IMU::init(int cs, int clk, int miso, int mosi)
         break;
     }
 
-    //  controller.setAccelRateDivisor(4095);
+    controller.setAccelRateDivisor(0);
     uint16_t accel_divisor = controller.getAccelRateDivisor();
     float accel_rate = 1125 / (1.0 + accel_divisor);
 
@@ -66,7 +66,7 @@ bool ICM20649IMU::init(int cs, int clk, int miso, int mosi)
     Serial.print("Accelerometer data rate (Hz) is approximately: ");
     Serial.println(accel_rate);
 
-    //  controller.setGyroRateDivisor(255);
+    controller.setGyroRateDivisor(0);
     uint8_t gyro_divisor = controller.getGyroRateDivisor();
     float gyro_rate = 1100 / (1.0 + gyro_divisor);
 
@@ -78,10 +78,8 @@ bool ICM20649IMU::init(int cs, int clk, int miso, int mosi)
 
     Serial.println("Starting Calibration Sequence");
     Serial.println("Calibrating accelerometer");
-    // accelerometer_calibration = this->calibrate([this](bool refresh) {return this->getAcceleration(refresh); }, 5000, 1);
-    // gyroscope_calibration = this->calibrate([this](bool refresh) {return this->getGyro(refresh); }, 5000, 1);
     accelerometer_calibration = this->calibrate([this](bool refresh) -> Vec3
-                                                { return this->getGyro(refresh); }, 5000, 1);
+                                                { return this->getAcceleration(refresh); }, 5000, 1);
     Serial.println("Calibrating gyroscope");
     gyroscope_calibration = this->calibrate([this](bool refresh) -> Vec3
                                             { return this->getGyro(refresh); }, 5000, 1);
@@ -95,11 +93,21 @@ Vec3 ICM20649IMU::calibrate(std::function<Vec3(bool)> func, uint samples, uint d
     for (int i = 0; i < samples; i++)
     {
         Vec3 sensor_reading = func(true);
-        mean.x += (float)(sensor_reading.x / samples);
-        mean.y += (float)(sensor_reading.y / samples);
-        mean.z += (float)(sensor_reading.z / samples);
+        mean = sensor_reading + mean;
+        // if (i % 100 == 0)
+        // {
+        //     Serial.print("Sample ");
+        //     Serial.print(i);
+        //     Serial.print(" : ");
+        //     Serial.print(sensor_reading.x);
+        //     Serial.print(", ");
+        //     Serial.print(sensor_reading.y);
+        //     Serial.print(", ");
+        //     Serial.println(sensor_reading.z);
+        // }
         delay(dt);
     }
+    mean = mean * (1 / (float)samples);
     Serial.println("Calibrate Done");
     Serial.print("Offsets : ");
     Serial.print(mean.x);

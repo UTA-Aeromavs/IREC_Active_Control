@@ -28,5 +28,14 @@ void setup() {
 }
 
 void loop() {
-  unsigned long tstart = micros();
+  // Vec3 acceleration = imu.getAcceleration();
+  // Vec3 gyroscope = imu.getGyro();
+  // Serial.print(micros());
+  // Serial.print(" : gx");
+  // Serial.print(gyroscope.x);
+  // Serial.print(" : gy");
+  // Serial.print(gyroscope.y);
+  // Serial.print(" : gz");
+  // Serial.println(gyroscope.z);
+  delay(500);
 }
