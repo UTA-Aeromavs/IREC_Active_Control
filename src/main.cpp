@@ -28,8 +28,8 @@ void setup() {
 }
 
 void loop() {
-  // Vec3 acceleration = imu.getAcceleration();
-  // Vec3 gyroscope = imu.getGyro();
+  // Vec3 acceleration = imu.get_raw_acceleration();
+  // Vec3 gyroscope = imu.get_raw_angular_velocity();
   // Serial.print(micros());
   // Serial.print(" : gx");
   // Serial.print(gyroscope.x);
