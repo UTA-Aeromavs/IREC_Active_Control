@@ -4,7 +4,6 @@
 #include "Vmath.h"
 #include "Bframe.h"
 #include "DataProcessors.h"
-#include <functional>
 
 
 // SCL on icm
@@ -41,9 +40,5 @@ class ICM20649IMU{
         IMUReading read();
         Vec3 get_raw_acceleration(bool refresh_buffer = true);
         Vec3 get_raw_angular_velocity(bool refresh_buffer = true);
-        /*
-        Creates normalized body attached frame that is calibrated and filtered
-        IT IS YOUR RESPONSIBILITY TO FREE THE BFRAME ONCE CREATED
-        */
-        Bframe* buildBframe(Bframe* previous_frame);
+        void write_bframe(Bframe* current_frame, Bframe *previous_frame);
 };

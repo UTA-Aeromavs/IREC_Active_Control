@@ -111,14 +111,12 @@ Vec3 ICM20649IMU::get_raw_angular_velocity(bool refresh_buffer)
 
 
 
-Bframe* ICM20649IMU::buildBframe(Bframe *previous_frame)
+void ICM20649IMU::write_bframe(Bframe* current_frame, Bframe *previous_frame)
 {
-    Bframe head;
-    head.acceleration = this->get_raw_acceleration() - accelerometer_calibration;
-    head.angular_velocity = gyro_filter->filter(this->get_raw_angular_velocity(false) - gyroscope_calibration, buffer.timestamp);
-    head.timestamp = buffer.timestamp;
-    head.buffer = previous_frame;
-    return &head;
+    current_frame->acceleration = this->get_raw_acceleration() - accelerometer_calibration;
+    current_frame->angular_velocity = gyro_filter->filter(this->get_raw_angular_velocity(false) - gyroscope_calibration, buffer.timestamp);
+    current_frame->timestamp = buffer.timestamp;
+    current_frame->buffer = previous_frame;
 }
 
 template <typename T>
