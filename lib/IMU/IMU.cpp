@@ -11,7 +11,7 @@ IMUReading ICM20649IMU::read()
     controller.getEvent(&head.accelerometer_reading,
                         &head.gyroscope_reading,
                         &head.temperature_reading);
-    head.timestamp = millis();
+    head.timestamp = micros();
     return head;
 }
 
@@ -78,33 +78,55 @@ bool ICM20649IMU::init(int cs, int clk, int miso, int mosi)
 
     Serial.println("Starting Calibration Sequence");
     Serial.println("Calibrating accelerometer");
-    accelerometer_calibration = this->calibrate([this](bool refresh) -> Vec3
-                                                { return this->getAcceleration(refresh); }, 5000, 1);
-    Serial.println("Calibrating gyroscope");
-    gyroscope_calibration = this->calibrate([this](bool refresh) -> Vec3
-                                            { return this->getGyro(refresh); }, 5000, 1);
+
+    accelerometer_calibration = static_calibration(this, &ICM20649IMU::get_raw_acceleration, 5000, 1);
+    gyroscope_calibration = static_calibration(this, &ICM20649IMU::get_raw_angular_velocity, 5000, 1);
+
+    gyro_filter = new DigitalLowPass(buffer.timestamp);
     Serial.println("SETUP COMPLETE");
     return true;
 }
 
-Vec3 ICM20649IMU::calibrate(std::function<Vec3(bool)> func, uint samples, uint dt)
+Vec3 ICM20649IMU::get_raw_acceleration(bool refresh_buffer)
 {
-    Vec3 mean(0, 0, 0);
+    if (refresh_buffer)
+    {
+        buffer = this->read();
+    }
+    return Vec3(buffer.accelerometer_reading.acceleration.x,
+                buffer.accelerometer_reading.acceleration.y,
+                buffer.accelerometer_reading.acceleration.z);
+}
+
+Vec3 ICM20649IMU::get_raw_angular_velocity(bool refresh_buffer)
+{
+    if (refresh_buffer)
+    {
+        buffer = this->read();
+    }
+    return Vec3(buffer.gyroscope_reading.gyro.x,
+                buffer.gyroscope_reading.gyro.y,
+                buffer.gyroscope_reading.gyro.z);
+}
+
+
+
+Bframe* ICM20649IMU::buildBframe(Bframe *previous_frame)
+{
+    Bframe head;
+    head.acceleration = this->get_raw_acceleration() - accelerometer_calibration;
+    head.angular_velocity = gyro_filter->filter(this->get_raw_angular_velocity(false) - gyroscope_calibration, buffer.timestamp);
+    head.timestamp = buffer.timestamp;
+    head.buffer = previous_frame;
+    return &head;
+}
+
+template <typename T>
+Vec3 static_calibration(T* IMU, Vec3 (T::*sensor_callback)(bool) ,uint samples, uint dt){
+        Vec3 mean(0, 0, 0);
     for (int i = 0; i < samples; i++)
     {
-        Vec3 sensor_reading = func(true);
-        mean = sensor_reading + mean;
-        // if (i % 100 == 0)
-        // {
-        //     Serial.print("Sample ");
-        //     Serial.print(i);
-        //     Serial.print(" : ");
-        //     Serial.print(sensor_reading.x);
-        //     Serial.print(", ");
-        //     Serial.print(sensor_reading.y);
-        //     Serial.print(", ");
-        //     Serial.println(sensor_reading.z);
-        // }
+        mean = mean + (IMU->*sensor_callback)(true);
         delay(dt);
     }
     mean = mean * (1 / (float)samples);
@@ -116,35 +138,4 @@ Vec3 ICM20649IMU::calibrate(std::function<Vec3(bool)> func, uint samples, uint d
     Serial.print(", ");
     Serial.println(mean.z);
     return mean;
-}
-
-Vec3 ICM20649IMU::getAcceleration(bool refresh_buffer)
-{
-    if (refresh_buffer)
-    {
-        buffer = this->read();
-    }
-    return Vec3(buffer.accelerometer_reading.acceleration.x,
-                buffer.accelerometer_reading.acceleration.y,
-                buffer.accelerometer_reading.acceleration.z);
-}
-
-Vec3 ICM20649IMU::getGyro(bool refresh_buffer)
-{
-    if (refresh_buffer)
-    {
-        buffer = this->read();
-    }
-    return Vec3(buffer.gyroscope_reading.gyro.x,
-                buffer.gyroscope_reading.gyro.y,
-                buffer.gyroscope_reading.gyro.z);
-}
-
-Bframe ICM20649IMU::buildBframe(Bframe *previous_frame)
-{
-    Bframe head;
-    head.acceleration = this->getAcceleration();
-    head.angular_velocity = this->getGyro(false);
-    head.timestamp = buffer.timestamp;
-    head.buffer = previous_frame;
 }
