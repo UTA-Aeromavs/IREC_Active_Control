@@ -41,7 +41,7 @@ class ICM20649IMU{
         Adafruit_ICM20649 controller; 
         Vec3 accelerometer_calibration;
         Vec3 gyroscope_calibration;
-        DigitalLowPass *gyro_filter; // otherwise constructor is called
+        StaticDriftCompensator *gyro_filter; // otherwise constructor is called
         IMUReading buffer;
     public:
         //These are the constructors and destructors that make sure there is no memory leak

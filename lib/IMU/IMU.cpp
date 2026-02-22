@@ -82,7 +82,7 @@ bool ICM20649IMU::init(int cs, int clk, int miso, int mosi)
     accelerometer_calibration = static_calibration(this, &ICM20649IMU::get_raw_acceleration, 5000, 1);
     gyroscope_calibration = static_calibration(this, &ICM20649IMU::get_raw_angular_velocity, 5000, 1);
 
-    gyro_filter = new DigitalLowPass(buffer.timestamp);
+    gyro_filter = new StaticDriftCompensator(buffer.timestamp, 0.1f);
     Serial.println("SETUP COMPLETE");
     return true;
 }
