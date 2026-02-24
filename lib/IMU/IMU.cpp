@@ -113,6 +113,10 @@ Vec3 ICM20649IMU::get_raw_angular_velocity(bool refresh_buffer)
 
 void ICM20649IMU::write_bframe(Bframe* current_frame, Bframe *previous_frame)
 {
+    if (current_frame == nullptr || gyro_filter == nullptr){
+        Serial.println("ERROR: Null pointer in write_bframe");
+        return;
+    }
     current_frame->acceleration = this->get_raw_acceleration() - accelerometer_calibration;
     current_frame->angular_velocity = gyro_filter->filter(this->get_raw_angular_velocity(false) - gyroscope_calibration, buffer.timestamp);
     current_frame->timestamp = buffer.timestamp;

@@ -4,8 +4,11 @@
 #include "Vmath.h"
 #include "Qmath.h"
 #include "IMU.h"
+#include "Bframe.h"
 
 ICM20649IMU imu;
+Bframe *head = new Bframe();
+Bframe *getMinusN(Bframe* current, unsigned Nminus);
 
 void setup() {
   Serial.begin(115200);
@@ -21,21 +24,40 @@ void setup() {
   Serial.println(hello.norm());
   Vec3 world(1, 1, 1);
   Serial.println(dot(hello, world));
-
   Quat foo(1, 0, 0, 0);
   Quat bar(0, 0.5, 0.5, 3);
   Serial.print((foo+bar).norm());
+  imu.write_bframe(head, nullptr);
 }
 
 void loop() {
-  // Vec3 acceleration = imu.get_raw_acceleration();
-  // Vec3 gyroscope = imu.get_raw_angular_velocity();
-  // Serial.print(micros());
-  // Serial.print(" : gx");
-  // Serial.print(gyroscope.x);
-  // Serial.print(" : gy");
-  // Serial.print(gyroscope.y);
-  // Serial.print(" : gz");
-  // Serial.println(gyroscope.z);
-  delay(500);
+  Bframe *prev = head;
+  head = new Bframe();
+  imu.write_bframe(head, prev);
+  Serial.print("a_n:");
+  Serial.print(head->acceleration.x);
+  if(head->buffer){
+    Serial.print(", a_(n-1):");
+    Serial.print(head->buffer->acceleration.x);
+  }
+  if(getMinusN(head, 4)){
+    Serial.print(", a_(n-4):");
+    Serial.print(getMinusN(head, 4)->acceleration.x);
+  }
+  Serial.println("");
+  // example of cleaning up buffer
+  if(getMinusN(head, 4)){
+    delete getMinusN(head, 4);
+  }
+  delay(3000);
+}
+
+Bframe *getMinusN(Bframe* current, unsigned Nminus){
+  if(Nminus == 0){
+    return current;
+  }
+  if(current == nullptr){
+    return nullptr;
+  }
+  return getMinusN(current->buffer, Nminus-1);
 }

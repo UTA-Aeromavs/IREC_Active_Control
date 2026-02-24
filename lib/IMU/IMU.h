@@ -41,6 +41,7 @@ class ICM20649IMU{
         Adafruit_ICM20649 controller; 
         Vec3 accelerometer_calibration;
         Vec3 gyroscope_calibration;
+        SPIClass *spi_bus;
         StaticDriftCompensator *gyro_filter; // otherwise constructor is called
         IMUReading buffer;
     public:
