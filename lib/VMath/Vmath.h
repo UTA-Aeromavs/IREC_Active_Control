@@ -20,6 +20,7 @@ class Vec3{
         Vec3 operator-(const Vec3 &other);
         // Vector Scaling
         Vec3 operator*(const float &other);
+        Vec3 operator/(const float &other);
         // Returns the magnitude of the vector
         float norm();
         // Returns 1/norm() or the reciprical of the vector magnitude

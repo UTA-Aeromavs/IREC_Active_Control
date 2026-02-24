@@ -20,6 +20,9 @@ Vec3 Vec3::operator*(const float &other)
 {
     return Vec3(x * other, y * other, z * other);
 }
+Vec3 Vec3::operator/(const float &other){
+    return Vec3(x / other, y / other, z / other);
+}
 float Vec3::norm()
 {
     return 1 / invSqrt(x * x + y * y + z * z);
