@@ -83,3 +83,14 @@ class ICM20649IMU{
         */
         void write_bframe(Bframe* current_frame, Bframe *previous_frame);
 };
+
+/*
+Returns static calibration (offset) of instrument
+IMU is an instance of any IMU
+sensor_callback is a pointer to a sensor callback (must impliment the ability to overwrite internal buffer)
+Samples is the number of samples taken during calibration sequence
+dt is the number of milliseconds to wait between measurements
+Total calibration time is Samples * dt / 1000 seconds
+*/
+template <typename T>
+Vec3 static_calibration(T* IMU, Vec3 (T::*sensor_callback)(bool) ,unsigned int samples, unsigned int dt);
