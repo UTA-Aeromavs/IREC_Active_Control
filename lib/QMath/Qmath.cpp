@@ -1,6 +1,6 @@
 #include "Qmath.h"
 #include "Vmath.h"
-#include "fastMath.h"
+#include "QuickMath.h"
 #include <cmath>
 
 Quat::Quat(float q0, float q1, float q2, float q3)

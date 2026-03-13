@@ -2,9 +2,14 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_ICM20649.h>
 #include "Vmath.h"
-#include "Bframe.h"
 #include "DataProcessors.h"
 
+
+/*
+DEPRICATED DEPRICATED DEPRICATED DEPRICATED DEPRICATED DEPRICATED 
+DEPRICATED DEPRICATED DEPRICATED DEPRICATED DEPRICATED DEPRICATED 
+DEPRICATED DEPRICATED DEPRICATED DEPRICATED DEPRICATED DEPRICATED 
+*/
 
 // SCL on icm
 #define SENSOR_CLK 7
@@ -95,3 +100,13 @@ Total calibration time is Samples * dt / 1000 seconds
 */
 template <typename T>
 Vec3 static_calibration(T* IMU, Vec3 (T::*sensor_callback)(bool) ,unsigned int samples, unsigned int dt);
+
+// Until I can reason through what will happen to the buffer I will keep this seperate for now
+Vec3 reorient_to_body_attached(Vec3 original_orientation); 
+
+
+/*
+DEPRICATED DEPRICATED DEPRICATED DEPRICATED DEPRICATED DEPRICATED 
+DEPRICATED DEPRICATED DEPRICATED DEPRICATED DEPRICATED DEPRICATED 
+DEPRICATED DEPRICATED DEPRICATED DEPRICATED DEPRICATED DEPRICATED 
+*/

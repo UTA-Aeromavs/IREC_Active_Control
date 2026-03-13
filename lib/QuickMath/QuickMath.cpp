@@ -1,4 +1,4 @@
-#include "fastMath.h"
+#include "QuickMath.h"
 
 // Fast inverse sqrt algorithm
 float invSqrt(float x) {

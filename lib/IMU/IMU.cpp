@@ -109,7 +109,9 @@ Vec3 ICM20649IMU::get_raw_angular_velocity(bool refresh_buffer)
                 buffer.gyroscope_reading.gyro.z);
 }
 
-
+Vec3 reorient_to_body_attached(Vec3 original_orientation){
+    return Vec3(original_orientation.y, -original_orientation.x, original_orientation.z);
+}
 
 void ICM20649IMU::write_bframe(Bframe* current_frame, Bframe *previous_frame)
 {
@@ -117,8 +119,8 @@ void ICM20649IMU::write_bframe(Bframe* current_frame, Bframe *previous_frame)
         Serial.println("ERROR: Null pointer in write_bframe");
         return;
     }
-    current_frame->acceleration = this->get_raw_acceleration() - accelerometer_calibration;
-    current_frame->angular_velocity = gyro_filter->filter(this->get_raw_angular_velocity(false) - gyroscope_calibration, buffer.timestamp);
+    current_frame->acceleration = reorient_to_body_attached(this->get_raw_acceleration() - accelerometer_calibration);
+    current_frame->angular_velocity = reorient_to_body_attached(gyro_filter->filter(this->get_raw_angular_velocity(false) - gyroscope_calibration, buffer.timestamp));
     current_frame->timestamp = buffer.timestamp;
     current_frame->buffer = previous_frame;
 }
