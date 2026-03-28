@@ -6,13 +6,13 @@
 #define SENSOR_MISO 6
 // SDA on icm
 #define SENSOR_MOSI 5
-#define SENSOR_CS 4
+#define ICM_CS 2
 
 // Check and CHANGE
 #define ICM_INT_PIN 10
 
-bool IMU_ICM20649::init(){
-    if(!this->begin_SPI(SENSOR_CS, SENSOR_CLK, SENSOR_MISO, SENSOR_MOSI)){
+bool IMU_ICM20649::init(uint8_t cs_pin, SPIClass *theSPI){
+    if(!this->begin_SPI(cs_pin, theSPI)){
         return false;
     }
     /*
@@ -80,8 +80,6 @@ bool IMU_ICM20649::init(){
     Serial.print("Gyro data rate (Hz) is approximately: ");
     Serial.println(gyro_rate);
     Serial.println();
-
-    Serial.println("SETUP COMPLETE");
     /* 
     Cutoff Frequencies for Accelerometer DLPF 
     ICM20X_ACCEL_FREQ_246_0_HZ = 246.0 Hz
@@ -93,7 +91,7 @@ bool IMU_ICM20649::init(){
     ICM20X_ACCEL_FREQ_473_HZ = 473 Hz
     */
    icm20x_accel_cutoff_t accel_cutoff = ICM20X_ACCEL_FREQ_473_HZ;
-   this->enableAccelDLPF(false, accel_cutoff);
+   this->enableAccelDLPF(true, accel_cutoff);
 
     /*
     Cutoff Frequencies for Gyro DLPF 
@@ -106,12 +104,10 @@ bool IMU_ICM20649::init(){
     ICM20X_GYRO_FREQ_5_7_HZ = 5.7 Hz
     ICM20X_GYRO_FREQ_361_4_HZ = 361.4 Hz
     */
-    icm20x_gyro_cutoff_t gyro_cutoff = ICM20X_GYRO_FREQ_23_9_HZ;
-    this->enableGyrolDLPF(false, gyro_cutoff);
+    icm20x_gyro_cutoff_t gyro_cutoff = ICM20X_GYRO_FREQ_5_7_HZ;
+    this->enableGyrolDLPF(true, gyro_cutoff);
 
-    if(!initInterrupt()){
-        return false;
-    };
+    Serial.println("ICM Setup complete");
     return true;
 }
 

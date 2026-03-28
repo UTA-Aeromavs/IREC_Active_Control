@@ -1,6 +1,6 @@
 #pragma once
 #include "QMath.h"
-#include <cstdio>
+#include <cstdio>   // for snprintf
 #include <cstddef>
 
 /*

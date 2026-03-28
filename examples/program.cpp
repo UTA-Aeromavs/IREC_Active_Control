@@ -186,7 +186,7 @@ bool initSDLogFile() {
     return false;
   }
 
-  logFile.println("System State, System State, Time since Launch(ms), omegaX, omegaY, omegaZ, aX, aY, aZ, vZ, vY, vZ, Pitch, Roll, Set Point(rads), EIntegral (rad-s), EDerivative (rad/s), Servo Deflection (rads), u(N-m), q(N/m^2), dt(s)");
+  logFile.println("timestamp,x,y,z");
   logFile.flush();
   return !logFile.getWriteError();
 }
@@ -197,79 +197,16 @@ bool log(unsigned long t) {
   digitalWrite(SD_CS, HIGH);
 
   // char buffer[256];
-  // int n = theTelemetry.toCSV(buffer, sizeof(buffer));
+  // int n = v.toCSV(buffer, sizeof(buffer));
   // if (n <= 0 || n >= (int)sizeof(buffer)) {
   //   return false;
   // }
+
   logFile.print(t);
   logFile.print(',');
-  logFile.print(sys);
-  logFile.print(',');
-  logFile.print(liftoffDetected);
-  logFile.print(',');
-  logFile.print(millis()-t_launch);
-  logFile.print(',');
-  logFile.print(angularVelocity.x);
-  logFile.print(',');
-  logFile.print(angularVelocity.y);
-  logFile.print(',');
-  logFile.print(angularVelocity.z);
-  logFile.print(',');
-  logFile.print(bodyAccel.x);
-  logFile.print(',');
-  logFile.print(bodyAccel.y);
-  logFile.print(',');
-  logFile.print(bodyAccel.z);
-  logFile.print(',');
-  logFile.print(inertialAccel.x);
-  logFile.print(',');
-  logFile.print(inertialAccel.y);
-  logFile.print(',');
-  logFile.print(inertialAccel.z);
-  logFile.print(',');
-  logFile.print(inertialVelocity.x);
-  logFile.print(',');
-  logFile.print(inertialVelocity.y);
-  logFile.print(',');
-  logFile.print(inertialVelocity.z);
-  logFile.print(',');
-  logFile.print(rotationQuat.q0);
-  logFile.print(',');
-  logFile.print(rotationQuat.q1);
-  logFile.print(',');
-  logFile.print(rotationQuat.q2);
-  logFile.print(',');
-  logFile.print(rotationQuat.q3);
-  logFile.print(',');
-  logFile.print(phi);
-  logFile.print(',');
-  logFile.print(roll);
-  logFile.print(',');
-  logFile.print(roll_target);
-  logFile.print(',');
-  logFile.print(e);
-  logFile.print(',');
-  logFile.print(Ie);
-  logFile.print(',');
-  logFile.print(De);
-  logFile.print(',');
-  logFile.print(delta);
-  logFile.print(',');
-  logFile.print(u);
-  logFile.print(',');
-  logFile.print(q);
-  logFile.print(',');
-  logFile.print(integrationMode);
-  logFile.print(',');
-  logFile.print(integrateVelocity);
-  logFile.print(',');
-  logFile.print(t_buffer[0]-t_buffer[1]);
-
   // logFile.write((const uint8_t*)buffer, n);
   logFile.println();
-  if(logFile.getWriteError()){
-    Serial.println("ERROR WRITING");
-  }
+
   return !logFile.getWriteError();
 }
 
@@ -602,11 +539,11 @@ void loop() {
       Serial.println("Log success");
     }
     lastSample = now;
-    
+
     if (now - lastFlush >= FLUSH_PERIOD_MS) {
       logFile.flush();
-    lastFlush = now;
-  }
+      lastFlush = now;
+    }
   }
 }
 

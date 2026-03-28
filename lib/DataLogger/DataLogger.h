@@ -23,22 +23,23 @@ public:
 };
 
 #ifndef LOG_BUFFER_SIZE
-#define LOG_BUFFER_SIZE 128
+#define LOG_BUFFER_SIZE 256
 #endif
 
 template<typename Data>
 bool SDLogger::log(const char* fileName, unsigned long timestamp, const Data& data) {
     if (!fileName || fileName[0] == '\0') return false;
     if (!_mounted && !begin()) return false;
-
     FsFile file;
     bool exists = _sd.exists(fileName);
 
     if (!file.open(fileName, O_WRONLY | O_CREAT | O_APPEND)) {
+        Serial.println("File found but Could not open file");
         return false;
     }
 
     if (!exists || file.size() == 0) {
+        Serial.println("No File found, Writing New one");
         file.print("timestamp,");
         file.println(Data::header());
     }

@@ -12,7 +12,7 @@ class IMU_ICM20649 : public Adafruit_ICM20649{
         Call at the beginning of the program to register the sensors to the I2C bus
         Set up the configurations for the sensor
         */
-        bool init();
+        bool init(uint8_t cs_pin, SPIClass *theSPI);
 
         /*
         @brief Read the latest sensor values 
