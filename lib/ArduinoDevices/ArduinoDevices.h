@@ -24,4 +24,6 @@ class IMU_ICM20649 : public Adafruit_ICM20649{
         Does not resample, but instead uses last sample.
         */
         void fillBframeWithRawData(Bframe& frame);
+    private:
+        bool initInterrupt();
 };

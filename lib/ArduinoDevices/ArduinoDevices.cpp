@@ -8,6 +8,9 @@
 #define SENSOR_MOSI 5
 #define SENSOR_CS 4
 
+// Check and CHANGE
+#define ICM_INT_PIN 10
+
 bool IMU_ICM20649::init(){
     if(!this->begin_SPI(SENSOR_CS, SENSOR_CLK, SENSOR_MISO, SENSOR_MOSI)){
         return false;
@@ -17,6 +20,8 @@ bool IMU_ICM20649::init(){
     The accelerometer and gyro output of ICM20649 is internally locked to units g and deg/s respectivly,
     So the higher the accel_range, the lower the resolution
     */
+
+    pinMode(ICM_INT_PIN, INPUT);
     this->setAccelRange(ICM20649_ACCEL_RANGE_30_G);
     Serial.print("Accelerometer range set to: ");
     switch (this->getAccelRange())
@@ -103,10 +108,50 @@ bool IMU_ICM20649::init(){
     */
     icm20x_gyro_cutoff_t gyro_cutoff = ICM20X_GYRO_FREQ_23_9_HZ;
     this->enableGyrolDLPF(false, gyro_cutoff);
+
+    if(!initInterrupt()){
+        return false;
+    };
     return true;
 }
 
-unsigned long IMU_ICM20649::updateimu(){
+bool IMU_ICM20649::initInterrupt() {
+    _setBank(0);
+
+    // Enable raw data ready interrupt to propagate to interrupt pin 1
+    Adafruit_BusIO_Register ICM20649_INT_ENABLE_1(
+        i2c_dev, spi_dev, ADDRBIT8_HIGH_TOREAD, 0x11);
+
+    Adafruit_BusIO_RegisterBits ICM20649_RAW_DATA_0_RDY_EN(
+        &ICM20649_INT_ENABLE_1, 1, 0);
+    ICM20649_RAW_DATA_0_RDY_EN.write(true);
+
+    // Configure INT1 behavior
+    Adafruit_BusIO_Register ICM20649_INT_PIN_CFG(
+        i2c_dev, spi_dev, ADDRBIT8_HIGH_TOREAD, 0x0F);
+
+    // INT1 pin level held until interrupt status is cleared
+    Adafruit_BusIO_RegisterBits ICM20649_INT1_LATCH__EN(
+        &ICM20649_INT_PIN_CFG, 1, 5);
+    ICM20649_INT1_LATCH__EN.write(true);
+
+    // INT1 active low
+    Adafruit_BusIO_RegisterBits ICM20649_INT1_ACTL(
+        &ICM20649_INT_PIN_CFG, 1, 7);
+    ICM20649_INT1_ACTL.write(true);
+
+    // INT1 push-pull
+    Adafruit_BusIO_RegisterBits ICM20649_INT1_OPEN(
+        &ICM20649_INT_PIN_CFG, 1, 6);
+    ICM20649_INT1_OPEN.write(false);
+
+    pinMode(ICM_INT_PIN, INPUT);
+}
+
+unsigned long IMU_ICM20649::updateimu() {
+    if (digitalRead(ICM_INT_PIN) != LOW) {
+        return 0;
+    }
     _read();
     return micros();
 }

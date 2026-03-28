@@ -1,5 +1,7 @@
 #pragma once
 #include "QMath.h"
+#include <cstdio>
+#include <cstddef>
 
 /*
 It holds 3 members : x, y, z
@@ -29,6 +31,14 @@ class Vec3{
         Vec3 normalize();
         // Transforms a roll-pitch-yaw vector to a quaternion
         Quat euler_to_quat();
+        // Logging helpers
+        static const char* header() {
+            return "x,y,z";
+        }
+
+        int toCSV(char* buffer, size_t size) const {
+            return snprintf(buffer, size, "%.6f,%.6f,%.6f", x, y, z);
+        }
 };
 // Returns dot product between two vectors
 float dot(Vec3 a, Vec3 b);
